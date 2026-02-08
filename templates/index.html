@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>What Drugs Does The Government Think You Do?</title>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,500;0,9..40,700;1,9..40,400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+
+<div class="masthead">
+  <span class="masthead-rule"></span>
+  <h1>What Drugs Does The Government Think You Do?</h1>
+  <p class="subtitle">Based on the Crime Survey for England &amp; Wales</p>
+  <p class="edition">Data: year ending March 2025 &middot; Published by the Office for National Statistics</p>
+</div>
+
+<div class="progress-track">
+  <div class="progress-bar-wrap">
+    <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+    <span class="progress-text" id="progressText">0 / {{ questions|length }}</span>
+  </div>
+</div>
+
+<div class="container">
+
+  <p class="intro">
+    The UK Government surveys tens of thousands of people each year about illegal drug use,
+    broken down by <strong>age, sex, ethnicity, income, employment, religion, lifestyle</strong>
+    and more. This app inverts that data: answer a few questions about yourself and find out
+    which drugs the government would <em>statistically expect</em> you to be taking.
+  </p>
+
+  <form id="questionnaire">
+    {% for q in questions %}
+    <div class="question-card" data-qid="{{ q.id }}" id="card-{{ q.id }}">
+      <div class="q-text">
+        <span class="q-number">{{ loop.index }}.</span>
+        {{ q.question }}
+      </div>
+      <div class="options">
+        {% for opt_key in q.options %}
+        <button type="button" class="option-btn" data-qid="{{ q.id }}" data-value="{{ opt_key }}">
+          {{ opt_key }}
+        </button>
+        {% endfor %}
+      </div>
+    </div>
+    {% endfor %}
+  </form>
+
+  <div class="submit-area" id="submitArea">
+    <button type="button" class="submit-btn" id="submitBtn" disabled>
+      Reveal My Drug Profile
+    </button>
+  </div>
+
+  <div class="loading" id="loading">
+    <div class="spinner"></div>
+    <p class="loading-text">Cross-referencing your profile with government data&hellip;</p>
+  </div>
+
+  <div id="results"></div>
+</div>
+
+<script src="{{ url_for('static', filename='app.js') }}"></script>
+</body>
+</html>
