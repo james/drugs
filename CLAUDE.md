@@ -98,6 +98,3 @@ Cannabis (Class B), Powder cocaine (Class A), Ecstasy (Class A), Hallucinogens (
 - Auto-stop/start enabled; scales to 0 when idle
 - Docker build uses `python:3.11-slim`
 
-## Known Issues
-
-- The `Dockerfile` only copies `app.py` and `csew_data.json` but not `data.py`, `predict.py`, `static/`, or `templates/`. This needs updating after the modular refactor to deploy correctly.
