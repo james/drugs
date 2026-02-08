@@ -220,6 +220,13 @@ body {
   margin-top: 0.3rem;
   font-weight: 300;
 }
+.any-drug-detail {
+  font-size: 0.8rem;
+  color: var(--muted);
+  margin-top: 0.4rem;
+  font-weight: 300;
+  font-style: italic;
+}
 
 .drug-row {
   display: flex;
@@ -284,12 +291,28 @@ body {
 .drug-bar-fill.class-c { background: var(--class-c); }
 .drug-bar-fill.default { background: var(--ink); }
 
-.drug-pct {
-  font-family: 'DM Sans', monospace;
-  font-size: 0.85rem;
-  font-weight: 700;
-  min-width: 4rem;
+.drug-pct-group {
+  min-width: 5.5rem;
   text-align: right;
+}
+.drug-multiplier {
+  font-family: 'DM Sans', monospace;
+  font-size: 1.1rem;
+  font-weight: 700;
+  line-height: 1.2;
+}
+.drug-multiplier.above { color: var(--red); }
+.drug-multiplier.below { color: var(--green); }
+.drug-multiplier.average { color: var(--muted); }
+.drug-abs-rate {
+  font-family: 'DM Sans', monospace;
+  font-size: 0.7rem;
+  font-weight: 300;
+  color: var(--muted);
+}
+.vs-baseline {
+  font-weight: 300;
+  color: var(--muted);
 }
 
 .drug-comment {

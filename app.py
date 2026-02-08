@@ -13,7 +13,7 @@ Published by the Office for National Statistics (ONS)
 
 from flask import Flask, render_template, request, redirect, url_for
 
-from data import QUESTIONS
+from data import BASELINE, QUESTIONS
 from predict import predict
 
 app = Flask(__name__)
@@ -54,25 +54,34 @@ def predict_route():
     top_three_sum = sum(d["rate"] for d in results[:3])
     any_drug = min(top_three_sum * 0.85, 95.0)
 
-    if any_drug > 20:
+    # Baseline "any drug" using same formula on baseline rates
+    baseline_sorted = sorted(BASELINE.values(), reverse=True)
+    baseline_any_drug = min(sum(baseline_sorted[:3]) * 0.85, 95.0)
+    any_drug_multiplier = round(any_drug / baseline_any_drug, 2) if baseline_any_drug > 0 else 1.0
+
+    if any_drug_multiplier > 2.5:
         verdict = "The government is fairly confident you\u2019re partying."
-    elif any_drug > 12:
+    elif any_drug_multiplier > 1.5:
         verdict = "A statistical side-eye from Whitehall."
-    elif any_drug > 7:
+    elif any_drug_multiplier > 0.8:
         verdict = "Statistically average \u2014 you blend into the crowd."
-    elif any_drug > 3:
+    elif any_drug_multiplier > 0.4:
         verdict = "Statistically squeaky-clean, but not implausibly so."
     else:
         verdict = "The Home Office considers you an absolute saint."
 
     max_rate = results[0]["rate"] if results else 0
+    max_multiplier = results[0]["multiplier"] if results else 1.0
 
     return render_template(
         "results.html",
         results=results,
         any_drug=any_drug,
+        any_drug_multiplier=any_drug_multiplier,
+        baseline_any_drug=baseline_any_drug,
         verdict=verdict,
         max_rate=max_rate,
+        max_multiplier=max_multiplier,
         drug_comments=DRUG_COMMENTS,
         answered=len(answers),
         total=len(QUESTIONS),

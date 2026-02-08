@@ -59,9 +59,13 @@ def predict(answers: dict) -> list[dict]:
         adjusted = min(adjusted, 95.0)
         adjusted = max(adjusted, 0.0)
 
+        multiplier = adjusted / base if base > 0 else 1.0
+
         results.append({
             "drug": drug,
             "rate": round(adjusted, 2),
+            "baseline_rate": round(base, 2),
+            "multiplier": round(multiplier, 2),
             "classification": DRUG_CLASSES.get(drug, ""),
         })
 
