@@ -1,0 +1,587 @@
+{
+  "baseline": {
+    "Powder cocaine": 2.0657,
+    "Ecstasy": 1.18,
+    "Hallucinogens": 1.0885,
+    "Amphetamines": 0.2378,
+    "Cannabis": 6.4803,
+    "Ketamine": 0.7958
+  },
+  "drug_classes": {
+    "Powder cocaine": "Class A",
+    "Ecstasy": "Class A",
+    "Hallucinogens": "Class A",
+    "Amphetamines": "Class B",
+    "Cannabis": "Class B",
+    "Ketamine": "Class B"
+  },
+  "questions": [
+    {
+      "id": "age",
+      "question": "How old are you?",
+      "options": {
+        "16\u201319": {
+          "Powder cocaine": 0.5438,
+          "Ecstasy": 1.2422,
+          "Hallucinogens": 1.2677,
+          "Amphetamines": 0,
+          "Cannabis": 11.2973,
+          "Ketamine": 0.8988
+        },
+        "20\u201324": {
+          "Powder cocaine": 3.7707,
+          "Ecstasy": 2.5119,
+          "Hallucinogens": 1.7005,
+          "Amphetamines": 0.4178,
+          "Cannabis": 13.5179,
+          "Ketamine": 2.9298
+        },
+        "25\u201329": {
+          "Powder cocaine": 4.0194,
+          "Ecstasy": 2.4214,
+          "Hallucinogens": 2.0469,
+          "Amphetamines": 0.3618,
+          "Cannabis": 10.3686,
+          "Ketamine": 1.7135
+        },
+        "30\u201334": {
+          "Powder cocaine": 3.1613,
+          "Ecstasy": 1.4255,
+          "Hallucinogens": 1.5714,
+          "Amphetamines": 0.2639,
+          "Cannabis": 6.5458,
+          "Ketamine": 0.9151
+        },
+        "35\u201344": {
+          "Powder cocaine": 2.1604,
+          "Ecstasy": 1.0639,
+          "Hallucinogens": 0.8317,
+          "Amphetamines": 0.3284,
+          "Cannabis": 4.468,
+          "Ketamine": 0.3225
+        },
+        "45\u201354": {
+          "Powder cocaine": 1.1176,
+          "Ecstasy": 0.4675,
+          "Hallucinogens": 0.6253,
+          "Amphetamines": 0.1132,
+          "Cannabis": 3.8991,
+          "Ketamine": 0.1664
+        },
+        "55\u201359": {
+          "Powder cocaine": 0.3557,
+          "Ecstasy": 0.176,
+          "Hallucinogens": 0.4372,
+          "Amphetamines": 0.163,
+          "Cannabis": 2.4616,
+          "Ketamine": 0.071
+        }
+      }
+    },
+    {
+      "id": "sex",
+      "question": "What is your sex?",
+      "options": {
+        "Male": {
+          "Powder cocaine": 2.4816,
+          "Ecstasy": 1.2224,
+          "Hallucinogens": 1.261,
+          "Amphetamines": 0.2778,
+          "Cannabis": 7.9441,
+          "Ketamine": 0.8308
+        },
+        "Female": {
+          "Powder cocaine": 1.6568,
+          "Ecstasy": 1.1383,
+          "Hallucinogens": 0.9189,
+          "Amphetamines": 0.1985,
+          "Cannabis": 5.0443,
+          "Ketamine": 0.7613
+        }
+      }
+    },
+    {
+      "id": "ethnicity",
+      "question": "What is your ethnic group?",
+      "options": {
+        "White": {
+          "Powder cocaine": 2.5501,
+          "Ecstasy": 1.4085,
+          "Hallucinogens": 1.364,
+          "Amphetamines": 0.2922,
+          "Cannabis": 7.4937,
+          "Ketamine": 0.8834
+        },
+        "Mixed / Multiple": {
+          "Powder cocaine": 4.7488,
+          "Ecstasy": 3.659,
+          "Hallucinogens": 1.2111,
+          "Amphetamines": 0.7323,
+          "Cannabis": 9.045,
+          "Ketamine": 1.8776
+        },
+        "Asian / Asian British": {
+          "Powder cocaine": 0.1928,
+          "Ecstasy": 0.2166,
+          "Hallucinogens": 0.2088,
+          "Amphetamines": 0,
+          "Cannabis": 1.6413,
+          "Ketamine": 0.3426
+        },
+        "Black / Black British": {
+          "Powder cocaine": 0.0355,
+          "Ecstasy": 0,
+          "Hallucinogens": 0,
+          "Amphetamines": 0,
+          "Cannabis": 5.4495,
+          "Ketamine": 0.1553
+        },
+        "Other ethnic group": {
+          "Powder cocaine": 0,
+          "Ecstasy": 0,
+          "Hallucinogens": 0,
+          "Amphetamines": 0,
+          "Cannabis": 2.6779,
+          "Ketamine": 1.3917
+        }
+      }
+    },
+    {
+      "id": "marital",
+      "question": "What is your relationship status?",
+      "options": {
+        "Married / civil partnership": {
+          "Powder cocaine": 1.161,
+          "Ecstasy": 0.535,
+          "Hallucinogens": 0.5674,
+          "Amphetamines": 0.0775,
+          "Cannabis": 2.5623,
+          "Ketamine": 0.1731
+        },
+        "Cohabiting": {
+          "Powder cocaine": 3.145,
+          "Ecstasy": 2.3954,
+          "Hallucinogens": 1.7778,
+          "Amphetamines": 0.3118,
+          "Cannabis": 8.6103,
+          "Ketamine": 1.6004
+        },
+        "Single": {
+          "Powder cocaine": 2.8153,
+          "Ecstasy": 1.6494,
+          "Hallucinogens": 1.5496,
+          "Amphetamines": 0.4212,
+          "Cannabis": 11.0474,
+          "Ketamine": 1.4124
+        },
+        "Separated": {
+          "Powder cocaine": 2.1,
+          "Ecstasy": 1.1972,
+          "Hallucinogens": 0.989,
+          "Amphetamines": 0,
+          "Cannabis": 4.0444,
+          "Ketamine": 0.2784
+        },
+        "Divorced": {
+          "Powder cocaine": 2.4238,
+          "Ecstasy": 0.552,
+          "Hallucinogens": 0.7554,
+          "Amphetamines": 0.3316,
+          "Cannabis": 6.1326,
+          "Ketamine": 0.1579
+        }
+      }
+    },
+    {
+      "id": "employment",
+      "question": "What is your employment status?",
+      "options": {
+        "Employed": {
+          "Powder cocaine": 2.2078,
+          "Ecstasy": 1.3473,
+          "Hallucinogens": 1.2292,
+          "Amphetamines": 0.2022,
+          "Cannabis": 6.0751,
+          "Ketamine": 0.8329
+        },
+        "Unemployed": {
+          "Powder cocaine": 1.4833,
+          "Ecstasy": 0.7062,
+          "Hallucinogens": 1.58,
+          "Amphetamines": 0.0714,
+          "Cannabis": 7.6396,
+          "Ketamine": 1.3655
+        },
+        "Student": {
+          "Powder cocaine": 1.5345,
+          "Ecstasy": 0.7453,
+          "Hallucinogens": 0.4982,
+          "Amphetamines": 0.3594,
+          "Cannabis": 10.0218,
+          "Ketamine": 0.5266
+        },
+        "Long-term sick / disabled": {},
+        "Other economically inactive": {
+          "Powder cocaine": 1.5139,
+          "Ecstasy": 0.4818,
+          "Hallucinogens": 0.3527,
+          "Amphetamines": 0.435,
+          "Cannabis": 8.2002,
+          "Ketamine": 0.5312
+        }
+      }
+    },
+    {
+      "id": "qualification",
+      "question": "What is your highest qualification?",
+      "options": {
+        "Degree or diploma": {
+          "Powder cocaine": 2.1307,
+          "Ecstasy": 1.3789,
+          "Hallucinogens": 1.3652,
+          "Amphetamines": 0.248,
+          "Cannabis": 5.8095,
+          "Ketamine": 0.8487
+        },
+        "A-levels / apprenticeship": {
+          "Powder cocaine": 3.1546,
+          "Ecstasy": 1.53,
+          "Hallucinogens": 1.331,
+          "Amphetamines": 0.3532,
+          "Cannabis": 9.5377,
+          "Ketamine": 1.1917
+        },
+        "GCSEs / O-levels": {
+          "Powder cocaine": 1.2144,
+          "Ecstasy": 0.6597,
+          "Hallucinogens": 0.3669,
+          "Amphetamines": 0.08,
+          "Cannabis": 6.7092,
+          "Ketamine": 0.5448
+        },
+        "No qualifications": {
+          "Powder cocaine": 0.719,
+          "Ecstasy": 0.4937,
+          "Hallucinogens": 0.1684,
+          "Amphetamines": 0.2846,
+          "Cannabis": 5.0605,
+          "Ketamine": 0.1211
+        }
+      }
+    },
+    {
+      "id": "religion",
+      "question": "What is your religion?",
+      "options": {
+        "No religion": {
+          "Powder cocaine": 3.0482,
+          "Ecstasy": 1.8905,
+          "Hallucinogens": 1.5721,
+          "Amphetamines": 0.314,
+          "Cannabis": 9.1171,
+          "Ketamine": 1.1951
+        },
+        "Christian": {
+          "Powder cocaine": 1.3707,
+          "Ecstasy": 0.493,
+          "Hallucinogens": 0.628,
+          "Amphetamines": 0.2109,
+          "Cannabis": 4.5163,
+          "Ketamine": 0.3456
+        },
+        "Muslim": {
+          "Powder cocaine": 0.505,
+          "Ecstasy": 0.504,
+          "Hallucinogens": 0,
+          "Amphetamines": 0.0259,
+          "Cannabis": 1.8801,
+          "Ketamine": 0.9586
+        }
+      }
+    },
+    {
+      "id": "nightclub",
+      "question": "How many times did you visit a nightclub in the past month?",
+      "options": {
+        "None": {
+          "Powder cocaine": 1.5019,
+          "Ecstasy": 0.7623,
+          "Hallucinogens": 0.8871,
+          "Amphetamines": 0.1853,
+          "Cannabis": 5.4998,
+          "Ketamine": 0.476
+        },
+        "1 to 3 visits": {
+          "Powder cocaine": 8.9742,
+          "Ecstasy": 6.7565,
+          "Hallucinogens": 3.6481,
+          "Amphetamines": 0.733,
+          "Cannabis": 18.3864,
+          "Ketamine": 5.1293
+        },
+        "4 or more visits": {
+          "Powder cocaine": 12.5513,
+          "Ecstasy": 6.1317,
+          "Hallucinogens": 4.3354,
+          "Amphetamines": 2.1269,
+          "Cannabis": 25.5713,
+          "Ketamine": 4.2831
+        }
+      }
+    },
+    {
+      "id": "pub",
+      "question": "How many evening visits to a pub or bar did you make in the past month?",
+      "options": {
+        "None": {
+          "Powder cocaine": 0.4329,
+          "Ecstasy": 0.3419,
+          "Hallucinogens": 0.2082,
+          "Amphetamines": 0.1629,
+          "Cannabis": 3.5158,
+          "Ketamine": 0.2111
+        },
+        "1 to 3 visits": {
+          "Powder cocaine": 2.48,
+          "Ecstasy": 1.6352,
+          "Hallucinogens": 1.4326,
+          "Amphetamines": 0.2181,
+          "Cannabis": 7.8317,
+          "Ketamine": 0.8137
+        },
+        "4 to 8 visits": {
+          "Powder cocaine": 6.2112,
+          "Ecstasy": 2.945,
+          "Hallucinogens": 3.2271,
+          "Amphetamines": 0.5426,
+          "Cannabis": 12.6401,
+          "Ketamine": 2.3309
+        },
+        "9 or more visits": {
+          "Powder cocaine": 8.7419,
+          "Ecstasy": 3.4002,
+          "Hallucinogens": 3.7144,
+          "Amphetamines": 0.5004,
+          "Cannabis": 17.4007,
+          "Ketamine": 4.3352
+        }
+      }
+    },
+    {
+      "id": "alcohol",
+      "question": "How often do you drink alcohol?",
+      "options": {
+        "Less than once a month (inc. non-drinkers)": {
+          "Powder cocaine": 0.6302,
+          "Ecstasy": 0.4278,
+          "Hallucinogens": 0.5171,
+          "Amphetamines": 0.1312,
+          "Cannabis": 4.031,
+          "Ketamine": 0.3027
+        },
+        "Less than once a week": {
+          "Powder cocaine": 1.7034,
+          "Ecstasy": 1.7045,
+          "Hallucinogens": 1.1549,
+          "Amphetamines": 0.0488,
+          "Cannabis": 6.6758,
+          "Ketamine": 0.9622
+        },
+        "1\u20132 days a week": {
+          "Powder cocaine": 2.9379,
+          "Ecstasy": 1.3847,
+          "Hallucinogens": 1.2375,
+          "Amphetamines": 0.3043,
+          "Cannabis": 8.1486,
+          "Ketamine": 0.9035
+        },
+        "3 or more days a week": {
+          "Powder cocaine": 5.8186,
+          "Ecstasy": 2.9511,
+          "Hallucinogens": 2.7339,
+          "Amphetamines": 0.7018,
+          "Cannabis": 11.8196,
+          "Ketamine": 2.2202
+        }
+      }
+    },
+    {
+      "id": "satisfaction",
+      "question": "How satisfied are you with your life? (0 = not at all, 10 = completely)",
+      "options": {
+        "Low (0\u20134)": {
+          "Powder cocaine": 4.531,
+          "Ecstasy": 0.3072,
+          "Hallucinogens": 1.14,
+          "Amphetamines": 0.3613,
+          "Cannabis": 11.484,
+          "Ketamine": 0.4439
+        },
+        "Medium (5\u20136)": {
+          "Powder cocaine": 3.4152,
+          "Ecstasy": 0.5946,
+          "Hallucinogens": 2.1155,
+          "Amphetamines": 0.376,
+          "Cannabis": 9.0844,
+          "Ketamine": 1.0526
+        },
+        "High (7\u20138)": {
+          "Powder cocaine": 2.8972,
+          "Ecstasy": 1.8162,
+          "Hallucinogens": 1.2774,
+          "Amphetamines": 0.2472,
+          "Cannabis": 5.6566,
+          "Ketamine": 0.8934
+        },
+        "Very high (9\u201310)": {
+          "Powder cocaine": 0.9364,
+          "Ecstasy": 0.7887,
+          "Hallucinogens": 0.5886,
+          "Amphetamines": 0.0149,
+          "Cannabis": 3.577,
+          "Ketamine": 0.203
+        }
+      }
+    },
+    {
+      "id": "income",
+      "question": "What is your total household income?",
+      "options": {
+        "Under \u00a310,400": {
+          "Powder cocaine": 2.8195,
+          "Ecstasy": 1.075,
+          "Hallucinogens": 1.1985,
+          "Amphetamines": 1.3362,
+          "Cannabis": 10.9045,
+          "Ketamine": 1.9026
+        },
+        "\u00a310,400 \u2013 \u00a320,799": {
+          "Powder cocaine": 2.0344,
+          "Ecstasy": 1.0621,
+          "Hallucinogens": 0.975,
+          "Amphetamines": 0.2452,
+          "Cannabis": 8.1184,
+          "Ketamine": 1.2684
+        },
+        "\u00a320,800 \u2013 \u00a331,199": {
+          "Powder cocaine": 1.6413,
+          "Ecstasy": 0.819,
+          "Hallucinogens": 0.7149,
+          "Amphetamines": 0.2459,
+          "Cannabis": 5.1365,
+          "Ketamine": 0.9363
+        },
+        "\u00a331,200 \u2013 \u00a341,599": {
+          "Powder cocaine": 1.408,
+          "Ecstasy": 0.8198,
+          "Hallucinogens": 0.6815,
+          "Amphetamines": 0.2339,
+          "Cannabis": 5.9762,
+          "Ketamine": 0.3792
+        },
+        "\u00a341,600 \u2013 \u00a351,999": {
+          "Powder cocaine": 1.9581,
+          "Ecstasy": 1.0607,
+          "Hallucinogens": 1.1382,
+          "Amphetamines": 0.1684,
+          "Cannabis": 5.6847,
+          "Ketamine": 0.7648
+        },
+        "\u00a352,000 or more": {
+          "Powder cocaine": 2.8961,
+          "Ecstasy": 1.7622,
+          "Hallucinogens": 1.5252,
+          "Amphetamines": 0.2118,
+          "Cannabis": 6.7572,
+          "Ketamine": 0.9022
+        }
+      }
+    },
+    {
+      "id": "region",
+      "question": "Where do you live?",
+      "options": {
+        "North East": {
+          "Powder cocaine": 2.8053,
+          "Ecstasy": 0.7373,
+          "Hallucinogens": 1.1089,
+          "Amphetamines": 0.1451,
+          "Cannabis": 4.4417,
+          "Ketamine": 0.7189
+        },
+        "North West": {
+          "Powder cocaine": 2.5909,
+          "Ecstasy": 1.0056,
+          "Hallucinogens": 0.9725,
+          "Amphetamines": 0.4624,
+          "Cannabis": 8.1675,
+          "Ketamine": 1.3668
+        },
+        "Yorkshire and the Humber": {
+          "Powder cocaine": 2.1909,
+          "Ecstasy": 1.4522,
+          "Hallucinogens": 0.7461,
+          "Amphetamines": 0.215,
+          "Cannabis": 6.1389,
+          "Ketamine": 0.719
+        },
+        "East Midlands": {
+          "Powder cocaine": 1.1489,
+          "Ecstasy": 0.7077,
+          "Hallucinogens": 0.9118,
+          "Amphetamines": 0.2249,
+          "Cannabis": 5.2646,
+          "Ketamine": 0.5953
+        },
+        "West Midlands": {
+          "Powder cocaine": 1.8009,
+          "Ecstasy": 0.5955,
+          "Hallucinogens": 1.2707,
+          "Amphetamines": 0.0108,
+          "Cannabis": 6.3679,
+          "Ketamine": 0.5903
+        },
+        "East of England": {
+          "Powder cocaine": 1.2199,
+          "Ecstasy": 1.238,
+          "Hallucinogens": 0.5929,
+          "Amphetamines": 0.0221,
+          "Cannabis": 5.3505,
+          "Ketamine": 0.5255
+        },
+        "London": {
+          "Powder cocaine": 2.0019,
+          "Ecstasy": 1.3743,
+          "Hallucinogens": 1.3797,
+          "Amphetamines": 0.1215,
+          "Cannabis": 5.2681,
+          "Ketamine": 0.484
+        },
+        "South East": {
+          "Powder cocaine": 2.5172,
+          "Ecstasy": 1.3119,
+          "Hallucinogens": 1.2387,
+          "Amphetamines": 0.3395,
+          "Cannabis": 6.7194,
+          "Ketamine": 1.0756
+        },
+        "South West": {
+          "Powder cocaine": 2.4431,
+          "Ecstasy": 2.2343,
+          "Hallucinogens": 1.1638,
+          "Amphetamines": 0.4173,
+          "Cannabis": 9.5628,
+          "Ketamine": 1.1019
+        },
+        "Wales": {
+          "Powder cocaine": 1.7545,
+          "Ecstasy": 0.4102,
+          "Hallucinogens": 1.269,
+          "Amphetamines": 0.4528,
+          "Cannabis": 6.7592,
+          "Ketamine": 0.4903
+        }
+      }
+    }
+  ]
+}
