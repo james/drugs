@@ -8,7 +8,11 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 # Copy application files
 COPY app.py .
+COPY data.py .
+COPY predict.py .
 COPY csew_data.json .
+COPY static/ static/
+COPY templates/ templates/
 
 # Expose port
 EXPOSE 8080
