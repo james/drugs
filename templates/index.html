@@ -16,13 +16,6 @@
   <p class="edition">Data: year ending March 2025 &middot; Published by the Office for National Statistics</p>
 </div>
 
-<div class="progress-track">
-  <div class="progress-bar-wrap">
-    <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
-    <span class="progress-text" id="progressText">0 / {{ questions|length }}</span>
-  </div>
-</div>
-
 <div class="container">
 
   <p class="intro">
@@ -32,38 +25,32 @@
     which drugs the government would <em>statistically expect</em> you to be taking.
   </p>
 
-  <form id="questionnaire">
+  <form action="/predict" method="POST">
     {% for q in questions %}
-    <div class="question-card" data-qid="{{ q.id }}" id="card-{{ q.id }}">
-      <div class="q-text">
+    <fieldset class="question-card">
+      <legend class="q-text">
         <span class="q-number">{{ loop.index }}.</span>
         {{ q.question }}
-      </div>
+      </legend>
       <div class="options">
         {% for opt_key in q.options %}
-        <button type="button" class="option-btn" data-qid="{{ q.id }}" data-value="{{ opt_key }}">
-          {{ opt_key }}
-        </button>
+        <label class="option-label">
+          <input type="radio" name="{{ q.id }}" value="{{ opt_key }}">
+          <span class="option-text">{{ opt_key }}</span>
+        </label>
         {% endfor %}
       </div>
-    </div>
+    </fieldset>
     {% endfor %}
+
+    <div class="submit-area">
+      <button type="submit" class="submit-btn">
+        Reveal My Drug Profile
+      </button>
+    </div>
   </form>
 
-  <div class="submit-area" id="submitArea">
-    <button type="button" class="submit-btn" id="submitBtn" disabled>
-      Reveal My Drug Profile
-    </button>
-  </div>
-
-  <div class="loading" id="loading">
-    <div class="spinner"></div>
-    <p class="loading-text">Cross-referencing your profile with government data&hellip;</p>
-  </div>
-
-  <div id="results"></div>
 </div>
 
-<script src="{{ url_for('static', filename='app.js') }}"></script>
 </body>
 </html>
