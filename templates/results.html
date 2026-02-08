@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Your Drug Profile &mdash; What Drugs Does The Government Think You Do?</title>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,500;0,9..40,700;1,9..40,400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+
+<div class="masthead">
+  <span class="masthead-rule"></span>
+  <h1>What Drugs Does The Government Think You Do?</h1>
+  <p class="subtitle">Based on the Crime Survey for England &amp; Wales</p>
+  <p class="edition">Data: year ending March 2025 &middot; Published by the Office for National Statistics</p>
+</div>
+
+<div class="container">
+
+  <div class="results-header">
+    <h2>Your Government Drug Profile</h2>
+    <p class="verdict">{{ verdict }}</p>
+  </div>
+
+  <div class="any-drug-stat">
+    <div class="any-drug-pct">{{ "%.1f"|format(any_drug) }}%</div>
+    <div class="any-drug-label">estimated chance you&rsquo;ve used any illegal drug in the past year</div>
+  </div>
+
+  <div class="drug-list">
+    {% for d in results %}
+    {% set class_slug = d.classification|lower|replace(' ', '-') %}
+    {% set bar_width = ((d.rate / max_rate * 100) if max_rate > 0 else 0)|round(1) %}
+    {% set bar_width = [bar_width, 0.5]|max %}
+    <div class="drug-row">
+      <div class="drug-rank {{ 'top' if loop.index0 < 3 else '' }}">{{ loop.index }}</div>
+      <div class="drug-info">
+        <span class="drug-name">{{ d.drug }}</span>
+        {% if d.classification %}
+        <span class="drug-class {{ class_slug }}">{{ d.classification }}</span>
+        {% endif %}
+        <div class="drug-bar-wrap">
+          <div class="drug-bar"><div class="drug-bar-fill {{ class_slug }}" style="width: {{ bar_width }}%"></div></div>
+        </div>
+        {% if d.drug in drug_comments %}
+        <div class="drug-comment">{{ drug_comments[d.drug] }}</div>
+        {% endif %}
+      </div>
+      <div class="drug-pct">{{ "%.2f"|format(d.rate) }}%</div>
+    </div>
+    {% endfor %}
+  </div>
+
+  <div class="disclaimer">
+    <strong>Disclaimer.</strong>
+    This is a statistical toy based on published survey data from the Crime Survey for England and Wales (year ending March 2025).
+    Rates are adjusted using a geometric mean of demographic-specific prevalences &mdash; a simplification of complex, correlated factors.
+    The figures shown are not a prediction of <em>your</em> actual behaviour, nor should they be taken as advice or accusation.
+    Drug use carries serious health and legal risks.
+    No personal data is stored or transmitted beyond this page.
+  </div>
+
+  <a href="/" class="restart-btn">Start Again</a>
+
+</div>
+
+</body>
+</html>
