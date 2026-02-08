@@ -24,15 +24,16 @@
   </div>
 
   <div class="any-drug-stat">
-    <div class="any-drug-pct">{{ "%.1f"|format(any_drug) }}%</div>
-    <div class="any-drug-label">estimated chance you&rsquo;ve used any illegal drug in the past year</div>
+    <div class="any-drug-pct">{{ "%.1f"|format(any_drug_multiplier) }}&times;</div>
+    <div class="any-drug-label">your likelihood of drug use vs. the average person</div>
+    <div class="any-drug-detail">{{ "%.1f"|format(any_drug) }}% estimated chance vs. {{ "%.1f"|format(baseline_any_drug) }}% average</div>
   </div>
 
   <div class="drug-list">
     {% for d in results %}
     {% set class_slug = d.classification|lower|replace(' ', '-') %}
-    {% set bar_width = ((d.rate / max_rate * 100) if max_rate > 0 else 0)|round(1) %}
-    {% set bar_width = [bar_width, 0.5]|max %}
+    {% set bar_pct = ((d.multiplier / max_multiplier * 100) if max_multiplier > 0 else 0)|round(1) %}
+    {% set bar_pct = [bar_pct, 0.5]|max %}
     <div class="drug-row">
       <div class="drug-rank {{ 'top' if loop.index0 < 3 else '' }}">{{ loop.index }}</div>
       <div class="drug-info">
@@ -41,13 +42,16 @@
         <span class="drug-class {{ class_slug }}">{{ d.classification }}</span>
         {% endif %}
         <div class="drug-bar-wrap">
-          <div class="drug-bar"><div class="drug-bar-fill {{ class_slug }}" style="width: {{ bar_width }}%"></div></div>
+          <div class="drug-bar"><div class="drug-bar-fill {{ class_slug }}" style="width: {{ bar_pct }}%"></div></div>
         </div>
         {% if d.drug in drug_comments %}
         <div class="drug-comment">{{ drug_comments[d.drug] }}</div>
         {% endif %}
       </div>
-      <div class="drug-pct">{{ "%.2f"|format(d.rate) }}%</div>
+      <div class="drug-pct-group">
+        <div class="drug-multiplier {{ 'above' if d.multiplier > 1.05 else ('below' if d.multiplier < 0.95 else 'average') }}">{{ "%.1f"|format(d.multiplier) }}&times;</div>
+        <div class="drug-abs-rate">{{ "%.2f"|format(d.rate) }}% <span class="vs-baseline">vs {{ "%.2f"|format(d.baseline_rate) }}%</span></div>
+      </div>
     </div>
     {% endfor %}
   </div>
