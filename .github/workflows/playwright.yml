@@ -10,6 +10,7 @@ permissions:
   contents: read
   pages: write
   id-token: write
+  pull-requests: write
 
 concurrency:
   group: playwright-${{ github.ref }}
@@ -19,6 +20,9 @@ jobs:
   test:
     name: Run Playwright tests
     runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
     steps:
       - uses: actions/checkout@v4
 
@@ -27,28 +31,123 @@ jobs:
           python-version: "3.11"
 
       - name: Install dependencies
-        run: |
-          pip install flask pytest pytest-playwright playwright
+        run: pip install flask pytest pytest-playwright playwright
 
       - name: Install Playwright browsers
         run: playwright install --with-deps chromium
 
-      - name: Run Playwright tests with HTML report
-        run: >
-          python -m pytest test_features.py -v
-          --tracing=on
-          --screenshot=on
-          --output=test-results
-          2>&1; echo "TEST_EXIT_CODE=$?" >> "$GITHUB_ENV"
+      - name: Run Playwright tests
+        id: run-tests
+        run: |
+          set +e
+          python -m pytest test_features.py -v \
+            --tracing=on \
+            --screenshot=on \
+            --output=test-results \
+            2>&1 | tee pytest-output.txt
+          echo "exit_code=${PIPESTATUS[0]}" >> "$GITHUB_OUTPUT"
         env:
           PYTHONUNBUFFERED: "1"
 
-      - name: Build report site
+      - name: Build report
         if: always()
+        id: build-report
         run: |
-          mkdir -p playwright-report
+          python << 'PYEOF'
+          import json, os, glob, shutil, re
+          from datetime import datetime, timezone
 
-          # ── index page ──
+          report_dir = "playwright-report"
+          results_dir = "test-results"
+          os.makedirs(report_dir, exist_ok=True)
+
+          # Parse pytest output for per-test pass/fail and duration
+          test_results = {}
+          duration = "?"
+          try:
+              with open("pytest-output.txt") as f:
+                  for line in f:
+                      m = re.match(r"test_features\.py::(\S+)\s+(PASSED|FAILED)", line)
+                      if m:
+                          test_results[m.group(1)] = m.group(2).lower()
+                      dm = re.match(r".*in ([\d.]+)s", line)
+                      if dm:
+                          duration = dm.group(1)
+          except FileNotFoundError:
+              pass
+
+          test_names = [
+              "test_index_loads",
+              "test_empty_submission_stays_on_index",
+              "test_young_male_clubber",
+              "test_older_married_christian_woman",
+              "test_student_in_south_west",
+              "test_middle_aged_employed_white_male",
+              "test_single_answer_only",
+              "test_results_contain_drug_classifications",
+              "test_start_again_returns_to_form",
+          ]
+
+          tests = []
+          all_screenshots = []
+
+          for name in test_names:
+              test_dir = os.path.join(results_dir, f"test-features-py-{name}-chromium")
+              trace_file = None
+              if os.path.isdir(test_dir):
+                  for t in glob.glob(os.path.join(test_dir, "trace.zip")):
+                      dest = f"{name}-trace.zip"
+                      shutil.copy2(t, os.path.join(report_dir, dest))
+                      trace_file = dest
+                  for img in sorted(glob.glob(os.path.join(test_dir, "*.png"))):
+                      dest = f"{name}.png"
+                      shutil.copy2(img, os.path.join(report_dir, dest))
+                      all_screenshots.append({
+                          "name": name.replace("_", " ").replace("test ", ""),
+                          "path": dest,
+                      })
+
+              tests.append({
+                  "name": name.replace("_", " ").replace("test ", ""),
+                  "status": test_results.get(name, "unknown"),
+                  "trace": trace_file,
+              })
+
+          passed = sum(1 for t in tests if t["status"] == "passed")
+          failed = sum(1 for t in tests if t["status"] == "failed")
+
+          data = {
+              "tests": tests,
+              "screenshots": all_screenshots,
+              "duration": duration,
+              "timestamp": datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M UTC"),
+              "commit": os.environ.get("GITHUB_SHA", "local")[:8],
+          }
+
+          with open(os.path.join(report_dir, "results.json"), "w") as f:
+              json.dump(data, f, indent=2)
+
+          # Write summary for the PR comment step
+          with open(os.environ["GITHUB_OUTPUT"], "a") as out:
+              out.write(f"passed={passed}\n")
+              out.write(f"failed={failed}\n")
+              out.write(f"total={len(tests)}\n")
+              out.write(f"duration={duration}\n")
+
+          # Build per-test markdown table for PR comment
+          lines = []
+          for t in tests:
+              icon = {"passed": "\u2705", "failed": "\u274c"}.get(t["status"], "\u2753")
+              lines.append(f"| {icon} | {t['name']} | {t['status']} |")
+          table = "\n".join(lines)
+          # Use a file for multi-line output
+          with open("pr-comment-table.md", "w") as f:
+              f.write(table)
+
+          print(f"Report: {passed} passed, {failed} failed, {len(all_screenshots)} screenshots")
+          PYEOF
+
+          # Write the report HTML
           cat > playwright-report/index.html << 'HTMLEOF'
           <!DOCTYPE html>
           <html lang="en">
@@ -74,8 +173,9 @@ jobs:
             th, td { padding: 0.75rem 1rem; text-align: left; border-bottom: 1px solid var(--border); }
             th { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--muted); background: var(--bg); }
             .badge { display: inline-block; font-size: 0.7rem; font-weight: 700; padding: 0.15rem 0.5rem; border-radius: 2px; color: white; text-transform: uppercase; }
-            .badge.pass { background: var(--green); }
-            .badge.fail { background: var(--red); }
+            .badge.passed { background: var(--green); }
+            .badge.failed { background: var(--red); }
+            .badge.unknown { background: var(--muted); }
             .trace-link { font-size: 0.8rem; }
             .screenshots { margin-top: 2rem; }
             .screenshots h2 { font-size: 1.2rem; margin-bottom: 1rem; }
@@ -92,7 +192,7 @@ jobs:
             <p class="meta">What Drugs Does The Government Think You Do?</p>
           </div>
           <div class="container" id="content">
-            <p>Loading results...</p>
+            <noscript><p>Enable JavaScript to view this report.</p></noscript>
           </div>
           <script>
             fetch('results.json').then(r => r.json()).then(data => {
@@ -106,19 +206,20 @@ jobs:
                   <div class="stat"><div class="num">${total}</div><div class="label">Total</div></div>
                   <div class="stat pass"><div class="num">${passed}</div><div class="label">Passed</div></div>
                   <div class="stat ${failed > 0 ? 'fail' : ''}"><div class="num">${failed}</div><div class="label">Failed</div></div>
-                  <div class="stat"><div class="num">${data.duration}</div><div class="label">Duration (s)</div></div>
+                  <div class="stat"><div class="num">${data.duration}s</div><div class="label">Duration</div></div>
                 </div>
                 <table>
                   <thead><tr><th>Test</th><th>Status</th><th>Trace</th></tr></thead>
                   <tbody>`;
 
               data.tests.forEach(t => {
-                const badge = t.status === 'passed' ? 'pass' : 'fail';
-                const traceLink = t.trace ? `<a class="trace-link" href="${t.trace}">View trace</a>` : '';
+                const traceHtml = t.trace
+                  ? `<a class="trace-link" href="https://trace.playwright.dev/?trace=${encodeURIComponent(window.location.origin + window.location.pathname.replace(/\/$/,'') + '/' + t.trace)}" target="_blank">View trace</a>`
+                  : '';
                 html += `<tr>
                   <td>${t.name}</td>
-                  <td><span class="badge ${badge}">${t.status}</span></td>
-                  <td>${traceLink}</td>
+                  <td><span class="badge ${t.status}">${t.status}</span></td>
+                  <td>${traceHtml}</td>
                 </tr>`;
               });
 
@@ -146,105 +247,6 @@ jobs:
           </html>
           HTMLEOF
 
-      - name: Generate report data
-        if: always()
-        run: |
-          python - << 'PYEOF'
-          import json, os, glob, re
-          from datetime import datetime, timezone
-
-          report_dir = "playwright-report"
-          results_dir = "test-results"
-
-          # Parse pytest output from the step
-          tests = []
-          duration = "?"
-          log_file = os.environ.get("GITHUB_STEP_SUMMARY", "")
-
-          # Read test results from pytest output captured in the run step
-          # We'll re-parse by running pytest --co to get test names and check results dir
-          test_names = [
-              "test_index_loads",
-              "test_empty_submission_stays_on_index",
-              "test_young_male_clubber",
-              "test_older_married_christian_woman",
-              "test_student_in_south_west",
-              "test_middle_aged_employed_white_male",
-              "test_single_answer_only",
-              "test_results_contain_drug_classifications",
-              "test_start_again_returns_to_form",
-          ]
-
-          for name in test_names:
-              test_dir = os.path.join(results_dir, f"test-features-py-{name}-chromium")
-              trace_file = None
-              # Look for trace zip
-              if os.path.isdir(test_dir):
-                  traces = glob.glob(os.path.join(test_dir, "trace.zip"))
-                  if traces:
-                      # Copy trace to report dir
-                      import shutil
-                      dest = os.path.join(report_dir, f"{name}-trace.zip")
-                      shutil.copy2(traces[0], dest)
-                      trace_file = f"{name}-trace.zip"
-
-              # Check for screenshot
-              screenshots_found = []
-              if os.path.isdir(test_dir):
-                  for img in glob.glob(os.path.join(test_dir, "*.png")):
-                      import shutil
-                      dest_name = f"{name}.png"
-                      shutil.copy2(img, os.path.join(report_dir, dest_name))
-                      screenshots_found.append({"name": name, "path": dest_name})
-
-              # Determine pass/fail from test-results dir structure
-              # pytest-playwright creates dirs for each test; if a test fails it has
-              # artifacts. We'll mark based on env var from previous step.
-              tests.append({
-                  "name": name.replace("_", " ").title(),
-                  "status": "passed",  # will be overridden below if needed
-                  "trace": trace_file,
-              })
-
-          # Check the exit code to see if any tests failed
-          exit_code = int(os.environ.get("TEST_EXIT_CODE", "0"))
-
-          # Collect all screenshots
-          all_screenshots = []
-          for name in test_names:
-              test_dir = os.path.join(results_dir, f"test-features-py-{name}-chromium")
-              if os.path.isdir(test_dir):
-                  for img in sorted(glob.glob(os.path.join(test_dir, "*.png"))):
-                      all_screenshots.append({
-                          "name": name.replace("_", " ").title(),
-                          "path": os.path.basename(img),
-                      })
-
-          # If the overall run failed, try to detect which tests failed
-          # by checking for failure screenshots (test-failed-*.png pattern)
-          if exit_code != 0:
-              for t in tests:
-                  slug = t["name"].lower().replace(" ", "_")
-                  test_dir = os.path.join(results_dir, f"test-features-py-{slug}-chromium")
-                  if os.path.isdir(test_dir):
-                      fail_shots = glob.glob(os.path.join(test_dir, "test-failed-*"))
-                      if fail_shots:
-                          t["status"] = "failed"
-
-          data = {
-              "tests": tests,
-              "screenshots": all_screenshots,
-              "duration": "~30",
-              "timestamp": datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M UTC"),
-              "commit": os.environ.get("GITHUB_SHA", "local")[:8],
-          }
-
-          with open(os.path.join(report_dir, "results.json"), "w") as f:
-              json.dump(data, f, indent=2)
-
-          print(f"Report generated: {len(tests)} tests, {len(all_screenshots)} screenshots")
-          PYEOF
-
       - name: Upload report artifact
         if: always()
         uses: actions/upload-artifact@v4
@@ -253,7 +255,7 @@ jobs:
           path: playwright-report/
           retention-days: 30
 
-      - name: Upload test results artifact
+      - name: Upload test results
         if: always()
         uses: actions/upload-artifact@v4
         with:
@@ -261,25 +263,75 @@ jobs:
           path: test-results/
           retention-days: 30
 
+      - name: Configure Pages
+        if: always() && github.event_name == 'push'
+        uses: actions/configure-pages@v5
+
       - name: Upload Pages artifact
-        if: always()
+        if: always() && github.event_name == 'push'
         uses: actions/upload-pages-artifact@v3
         with:
           path: playwright-report/
 
-      - name: Fail if tests failed
-        if: env.TEST_EXIT_CODE != '0'
-        run: exit 1
-
-  deploy-report:
-    name: Deploy report to GitHub Pages
-    if: always()
-    needs: test
-    runs-on: ubuntu-latest
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-    steps:
       - name: Deploy to GitHub Pages
-        id: deployment
+        if: always() && github.event_name == 'push'
+        id: deploy
         uses: actions/deploy-pages@v4
+
+      - name: Comment on PR
+        if: always() && github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+
+            const passed = '${{ steps.build-report.outputs.passed }}';
+            const failed = '${{ steps.build-report.outputs.failed }}';
+            const total  = '${{ steps.build-report.outputs.total }}';
+            const duration = '${{ steps.build-report.outputs.duration }}';
+            const runUrl = `${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`;
+
+            let table = '';
+            try { table = fs.readFileSync('pr-comment-table.md', 'utf8'); } catch {}
+
+            const status = failed === '0' ? '✅ All tests passed' : `❌ ${failed} test(s) failed`;
+            const body = [
+              `## Playwright Test Report`,
+              ``,
+              `${status} — **${passed}/${total}** passed in ${duration}s`,
+              ``,
+              `| | Test | Status |`,
+              `|---|---|---|`,
+              table,
+              ``,
+              `📎 [Download full report](${runUrl}#artifacts) (traces, screenshots)`,
+            ].join('\n');
+
+            // Find and update existing comment, or create new one
+            const marker = '## Playwright Test Report';
+            const { data: comments } = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+            });
+            const existing = comments.find(c => c.body.startsWith(marker));
+
+            if (existing) {
+              await github.rest.issues.updateComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: existing.id,
+                body,
+              });
+            } else {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+                body,
+              });
+            }
+
+      - name: Fail if tests failed
+        if: always() && steps.run-tests.outputs.exit_code != '0'
+        run: exit 1
