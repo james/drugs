@@ -11,7 +11,6 @@ import os
 import pytest
 from playwright.sync_api import sync_playwright
 
-CHROMIUM_PATH = "/root/.cache/ms-playwright/chromium-1194/chrome-linux/chrome"
 BASE_URL = "http://127.0.0.1:5001"
 DRUGS = ["Cannabis", "Powder cocaine", "Ecstasy", "Hallucinogens", "Ketamine", "Amphetamines"]
 
@@ -43,7 +42,13 @@ def server():
 def browser(server):
     """Launch a headless Chromium browser for the test session."""
     pw = sync_playwright().start()
-    b = pw.chromium.launch(headless=True, executable_path=CHROMIUM_PATH)
+    launch_opts = {"headless": True}
+    # Allow overriding the Chromium path for environments where
+    # `playwright install` can't download (e.g. sandboxed containers).
+    chromium_path = os.environ.get("PLAYWRIGHT_CHROMIUM_PATH")
+    if chromium_path:
+        launch_opts["executable_path"] = chromium_path
+    b = pw.chromium.launch(**launch_opts)
     yield b
     b.close()
     pw.stop()

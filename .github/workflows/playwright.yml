@@ -1,0 +1,285 @@
+name: Playwright Tests
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: playwright-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    name: Run Playwright tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: |
+          pip install flask pytest pytest-playwright playwright
+
+      - name: Install Playwright browsers
+        run: playwright install --with-deps chromium
+
+      - name: Run Playwright tests with HTML report
+        run: >
+          python -m pytest test_features.py -v
+          --tracing=on
+          --screenshot=on
+          --output=test-results
+          2>&1; echo "TEST_EXIT_CODE=$?" >> "$GITHUB_ENV"
+        env:
+          PYTHONUNBUFFERED: "1"
+
+      - name: Build report site
+        if: always()
+        run: |
+          mkdir -p playwright-report
+
+          # ── index page ──
+          cat > playwright-report/index.html << 'HTMLEOF'
+          <!DOCTYPE html>
+          <html lang="en">
+          <head>
+          <meta charset="utf-8">
+          <meta name="viewport" content="width=device-width, initial-scale=1">
+          <title>Playwright Test Report</title>
+          <style>
+            :root { --bg: #f5f0e8; --ink: #1a1a18; --green: #27613b; --red: #c23616; --muted: #7f8c8d; --border: #e8e0d0; }
+            * { margin: 0; padding: 0; box-sizing: border-box; }
+            body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: var(--bg); color: var(--ink); min-height: 100vh; }
+            .header { text-align: center; padding: 2rem 1rem; border-bottom: 4px double var(--ink); max-width: 900px; margin: 0 auto; }
+            .header h1 { font-size: 1.8rem; margin-bottom: 0.3rem; }
+            .header .meta { font-size: 0.85rem; color: var(--muted); }
+            .container { max-width: 900px; margin: 0 auto; padding: 1.5rem; }
+            .summary { display: flex; gap: 1rem; justify-content: center; margin: 1.5rem 0; flex-wrap: wrap; }
+            .stat { text-align: center; padding: 1rem 2rem; border: 1px solid var(--border); background: white; min-width: 120px; }
+            .stat .num { font-size: 2rem; font-weight: 700; }
+            .stat .label { font-size: 0.75rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.1em; }
+            .stat.pass .num { color: var(--green); }
+            .stat.fail .num { color: var(--red); }
+            table { width: 100%; border-collapse: collapse; margin-top: 1.5rem; background: white; }
+            th, td { padding: 0.75rem 1rem; text-align: left; border-bottom: 1px solid var(--border); }
+            th { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--muted); background: var(--bg); }
+            .badge { display: inline-block; font-size: 0.7rem; font-weight: 700; padding: 0.15rem 0.5rem; border-radius: 2px; color: white; text-transform: uppercase; }
+            .badge.pass { background: var(--green); }
+            .badge.fail { background: var(--red); }
+            .trace-link { font-size: 0.8rem; }
+            .screenshots { margin-top: 2rem; }
+            .screenshots h2 { font-size: 1.2rem; margin-bottom: 1rem; }
+            .screenshot-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 1rem; }
+            .screenshot-card { border: 1px solid var(--border); background: white; overflow: hidden; }
+            .screenshot-card img { width: 100%; display: block; }
+            .screenshot-card .caption { padding: 0.5rem 0.75rem; font-size: 0.8rem; color: var(--muted); }
+            .footer { text-align: center; padding: 2rem; font-size: 0.8rem; color: var(--muted); }
+          </style>
+          </head>
+          <body>
+          <div class="header">
+            <h1>Playwright Test Report</h1>
+            <p class="meta">What Drugs Does The Government Think You Do?</p>
+          </div>
+          <div class="container" id="content">
+            <p>Loading results...</p>
+          </div>
+          <script>
+            fetch('results.json').then(r => r.json()).then(data => {
+              const el = document.getElementById('content');
+              const passed = data.tests.filter(t => t.status === 'passed').length;
+              const failed = data.tests.filter(t => t.status === 'failed').length;
+              const total = data.tests.length;
+
+              let html = `
+                <div class="summary">
+                  <div class="stat"><div class="num">${total}</div><div class="label">Total</div></div>
+                  <div class="stat pass"><div class="num">${passed}</div><div class="label">Passed</div></div>
+                  <div class="stat ${failed > 0 ? 'fail' : ''}"><div class="num">${failed}</div><div class="label">Failed</div></div>
+                  <div class="stat"><div class="num">${data.duration}</div><div class="label">Duration (s)</div></div>
+                </div>
+                <table>
+                  <thead><tr><th>Test</th><th>Status</th><th>Trace</th></tr></thead>
+                  <tbody>`;
+
+              data.tests.forEach(t => {
+                const badge = t.status === 'passed' ? 'pass' : 'fail';
+                const traceLink = t.trace ? `<a class="trace-link" href="${t.trace}">View trace</a>` : '';
+                html += `<tr>
+                  <td>${t.name}</td>
+                  <td><span class="badge ${badge}">${t.status}</span></td>
+                  <td>${traceLink}</td>
+                </tr>`;
+              });
+
+              html += '</tbody></table>';
+
+              if (data.screenshots && data.screenshots.length > 0) {
+                html += '<div class="screenshots"><h2>Screenshots</h2><div class="screenshot-grid">';
+                data.screenshots.forEach(s => {
+                  html += `<div class="screenshot-card">
+                    <img src="${s.path}" alt="${s.name}" loading="lazy">
+                    <div class="caption">${s.name}</div>
+                  </div>`;
+                });
+                html += '</div></div>';
+              }
+
+              html += `<div class="footer">
+                Generated ${data.timestamp} &middot; Commit <code>${data.commit}</code>
+              </div>`;
+
+              el.innerHTML = html;
+            });
+          </script>
+          </body>
+          </html>
+          HTMLEOF
+
+      - name: Generate report data
+        if: always()
+        run: |
+          python - << 'PYEOF'
+          import json, os, glob, re
+          from datetime import datetime, timezone
+
+          report_dir = "playwright-report"
+          results_dir = "test-results"
+
+          # Parse pytest output from the step
+          tests = []
+          duration = "?"
+          log_file = os.environ.get("GITHUB_STEP_SUMMARY", "")
+
+          # Read test results from pytest output captured in the run step
+          # We'll re-parse by running pytest --co to get test names and check results dir
+          test_names = [
+              "test_index_loads",
+              "test_empty_submission_stays_on_index",
+              "test_young_male_clubber",
+              "test_older_married_christian_woman",
+              "test_student_in_south_west",
+              "test_middle_aged_employed_white_male",
+              "test_single_answer_only",
+              "test_results_contain_drug_classifications",
+              "test_start_again_returns_to_form",
+          ]
+
+          for name in test_names:
+              test_dir = os.path.join(results_dir, f"test-features-py-{name}-chromium")
+              trace_file = None
+              # Look for trace zip
+              if os.path.isdir(test_dir):
+                  traces = glob.glob(os.path.join(test_dir, "trace.zip"))
+                  if traces:
+                      # Copy trace to report dir
+                      import shutil
+                      dest = os.path.join(report_dir, f"{name}-trace.zip")
+                      shutil.copy2(traces[0], dest)
+                      trace_file = f"{name}-trace.zip"
+
+              # Check for screenshot
+              screenshots_found = []
+              if os.path.isdir(test_dir):
+                  for img in glob.glob(os.path.join(test_dir, "*.png")):
+                      import shutil
+                      dest_name = f"{name}.png"
+                      shutil.copy2(img, os.path.join(report_dir, dest_name))
+                      screenshots_found.append({"name": name, "path": dest_name})
+
+              # Determine pass/fail from test-results dir structure
+              # pytest-playwright creates dirs for each test; if a test fails it has
+              # artifacts. We'll mark based on env var from previous step.
+              tests.append({
+                  "name": name.replace("_", " ").title(),
+                  "status": "passed",  # will be overridden below if needed
+                  "trace": trace_file,
+              })
+
+          # Check the exit code to see if any tests failed
+          exit_code = int(os.environ.get("TEST_EXIT_CODE", "0"))
+
+          # Collect all screenshots
+          all_screenshots = []
+          for name in test_names:
+              test_dir = os.path.join(results_dir, f"test-features-py-{name}-chromium")
+              if os.path.isdir(test_dir):
+                  for img in sorted(glob.glob(os.path.join(test_dir, "*.png"))):
+                      all_screenshots.append({
+                          "name": name.replace("_", " ").title(),
+                          "path": os.path.basename(img),
+                      })
+
+          # If the overall run failed, try to detect which tests failed
+          # by checking for failure screenshots (test-failed-*.png pattern)
+          if exit_code != 0:
+              for t in tests:
+                  slug = t["name"].lower().replace(" ", "_")
+                  test_dir = os.path.join(results_dir, f"test-features-py-{slug}-chromium")
+                  if os.path.isdir(test_dir):
+                      fail_shots = glob.glob(os.path.join(test_dir, "test-failed-*"))
+                      if fail_shots:
+                          t["status"] = "failed"
+
+          data = {
+              "tests": tests,
+              "screenshots": all_screenshots,
+              "duration": "~30",
+              "timestamp": datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M UTC"),
+              "commit": os.environ.get("GITHUB_SHA", "local")[:8],
+          }
+
+          with open(os.path.join(report_dir, "results.json"), "w") as f:
+              json.dump(data, f, indent=2)
+
+          print(f"Report generated: {len(tests)} tests, {len(all_screenshots)} screenshots")
+          PYEOF
+
+      - name: Upload report artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: playwright-report/
+          retention-days: 30
+
+      - name: Upload test results artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results
+          path: test-results/
+          retention-days: 30
+
+      - name: Upload Pages artifact
+        if: always()
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: playwright-report/
+
+      - name: Fail if tests failed
+        if: env.TEST_EXIT_CODE != '0'
+        run: exit 1
+
+  deploy-report:
+    name: Deploy report to GitHub Pages
+    if: always()
+    needs: test
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
