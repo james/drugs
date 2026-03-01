@@ -1,0 +1,39 @@
+name: Cleanup PR Report
+
+on:
+  pull_request:
+    types: [closed]
+
+permissions:
+  contents: write
+
+concurrency:
+  group: cleanup-pr-${{ github.event.number }}
+  cancel-in-progress: false
+
+jobs:
+  cleanup:
+    name: Remove PR report from GitHub Pages
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Remove PR report directory from gh-pages
+        run: |
+          if ! git ls-remote --exit-code --heads origin gh-pages > /dev/null 2>&1; then
+            echo "gh-pages branch does not exist, nothing to clean up"
+            exit 0
+          fi
+
+          git fetch origin gh-pages
+          git checkout gh-pages
+
+          if [ -d "pr-${{ github.event.number }}" ]; then
+            git config user.name "github-actions[bot]"
+            git config user.email "github-actions[bot]@users.noreply.github.com"
+            git rm -rf "pr-${{ github.event.number }}"
+            git commit -m "chore: remove Playwright report for PR #${{ github.event.number }}"
+            git push origin gh-pages
+          else
+            echo "No report directory found for PR #${{ github.event.number }}, skipping cleanup"
+          fi
